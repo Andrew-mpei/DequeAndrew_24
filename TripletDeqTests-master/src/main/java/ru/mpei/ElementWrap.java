@@ -1,4 +1,4 @@
 package ru.mpei;
 
-public class ElementWrap {
+public class ElementWrap <E>{
 }
