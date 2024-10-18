@@ -2,6 +2,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.mpei.Containerable;
+import ru.mpei.TripletDeque;
 
 import java.util.*;
 
@@ -9,7 +10,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class TripletTests {
 
-    private Deque<String> tQueue;
+    private Deque<String> tQueue = new TripletDeque<>(1000);
     private Containerable cQueue = (Containerable) tQueue;
 
     @Test
@@ -178,7 +179,7 @@ public class TripletTests {
         }
     }
 
-  
+
     @Test
     public void testIterator() {
 
@@ -282,9 +283,43 @@ public class TripletTests {
         Assertions.assertTrue(cntr!=null && cntr1 != null && cntr2 ==null);
 
     }
+    //TODO Новые тесты
+    @Test
+    void removeLastOccurrenceTest(){
+        for (int i=0; i < 23 ;i++){
+            tQueue.addFirst(""+i);
+        }//1 раз добавили "17"
+        tQueue.addLast("17");//2 раза добавили
+        tQueue.addLast("17");//3 раза добавили
 
+        tQueue.removeLastOccurrence("17");//удалили 1 раз
+        Assertions.assertTrue(tQueue.contains("17"));
+
+        tQueue.removeLastOccurrence("17");//удалили 2 раз
+        for (int i=0; i < 23 ;i++){
+            Assertions.assertTrue(tQueue.contains(""+i));
+        }
+    }
+    @Test
+    void removeFirstOccurrenceTest(){
+        for (int i=0; i < 23 ;i++){
+            tQueue.addFirst(""+i);
+        }
+        tQueue.addLast("17");//2 раза добавили
+        tQueue.addLast("17");//3 раза добавили
+        Assertions.assertTrue(tQueue.contains("17"));
+
+        tQueue.removeFirstOccurrence("17");//удалили 1 раз
+        Assertions.assertTrue(tQueue.contains("17"));
+
+        tQueue.removeFirstOccurrence("17");//удалили 2-ой раз
+        for (int i=18; i < 23 ;i++){
+            Assertions.assertTrue(tQueue.contains(""+i));
+        }
+    }
     @BeforeEach
     void beforeEach(){
         tQueue.clear();
     }
+
 }
