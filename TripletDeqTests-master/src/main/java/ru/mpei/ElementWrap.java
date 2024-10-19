@@ -10,10 +10,6 @@ public class ElementWrap <E>{
     public ElementWrap() {
     }
 
-//    public void setValues(Object[] values) {
-//        this.values = values;
-//    }
-
     public int getMaxSizeValues() {
         return maxSizeValues;
     }
@@ -38,7 +34,6 @@ public class ElementWrap <E>{
         return values;
     }
 
-    //номера несвободного элемента в левой части массива, вызывается после boolean checkNullLeft()
     public int checkNullLeftInt(){
         for (int i = 1; i < values.length; i++){
             if (values[i] != null){
@@ -47,11 +42,9 @@ public class ElementWrap <E>{
         }
         return values.length - 1;
     }
-    //номера несвободного элемента в правой части массива, вызывается после boolean checkNullRight()
+
     public int checkNullRightInt() {
-//        if (values[values.length - 1] != null) {
-//            return values.length - 1;
-//        }
+
         for (int i = values.length - 1; i >= 0; i--) {
             if (values[i] != null){
                 return i;
@@ -59,24 +52,12 @@ public class ElementWrap <E>{
         }
         return 0;
     }
-    //проверка наличия свободных элементов в левой части массива
+
     public boolean checkNullLeft(){
         return (values[0] == null);
     }
-    //проверка наличия свободных элементов в правой части массива
+
     public boolean checkNullRight() {
         return (values[maxSizeValues] == null);
-    }
-    public boolean checkOneElement(){
-        int count = 0;
-        for (int i = 0; i < values.length; i++){
-            if (values[i] == null){
-                count ++;
-            }
-        }
-        if (count == 1){
-            return true;
-        }
-        return false;
     }
 }

@@ -1,16 +1,13 @@
 package ru.mpei;
 
-import java.util.Collection;
-import java.util.Deque;
-import java.util.Iterator;
-import java.util.NoSuchElementException;
+import java.util.*;
 
 public class TripletDeque<E> implements Deque<E>, Containerable {
     private ElementWrap<E> firstValues;
     private ElementWrap<E> lastValues;
     private int size = 0;
 
-    private int maxSizeTriplet = 1000;
+    private int maxSizeTriplet;
 
 
     public TripletDeque(int maxSizeTriplet) {
@@ -18,17 +15,9 @@ public class TripletDeque<E> implements Deque<E>, Containerable {
         ElementWrap<E> elementWrap = new ElementWrap<>();
         firstValues = elementWrap;
         lastValues = elementWrap;
+        size = 1;
     }
-    //    вставляет указанный элемент в начало этого списка, если это возможно сделать немедленно, не нарушая ограничений по емкости,
-//    вызывая исключение IllegalStateException, если в данный момент нет свободного места. При использовании deque с ограниченной пропускной способностью,
-//    как правило, предпочтительнее сначала воспользоваться предложением метода.
-//    Параметры:
-//    e – элемент, который нужно добавить
-//    Бросает:
-//    Исключение IllegalStateException – если элемент не может быть добавлен в данный момент из-за ограничений емкости
-//    ClassCastException – если класс указанного элемента препятствует его добавлению в этот список
-//    Исключение NullPointerException – если указанный элемент равен null и этот deque не разрешает элементы null
-//    Исключение IllegalArgumentException – если какое-либо свойство указанного элемента препятствует его добавлению в этот список
+
     @Override
     public void addFirst(E e) {
         if (e == null){
@@ -40,13 +29,11 @@ public class TripletDeque<E> implements Deque<E>, Containerable {
         if (size >= maxSizeTriplet){
             throw new IllegalStateException();
         }
-        //есть место слева
+
         if(firstValues.checkNullLeft()){
             firstValues.getValues()[firstValues.checkNullLeftInt() - 1] = e;
-            //места слева нет, проверяем справа есть ли место -> смещаем элементы
         }else{
             createLeftTriplet(e);
-            size++;
 
         }
         while (firstValues.getValues()[firstValues.getValues().length-1] == null){
@@ -63,12 +50,10 @@ public class TripletDeque<E> implements Deque<E>, Containerable {
         if (size >= maxSizeTriplet){
             throw new IllegalStateException();
         }
-        //есть место справа
         if(lastValues.checkNullRight()){
             lastValues.getValues()[lastValues.checkNullRightInt() + 1] = e;
         }else{
             createRightTriplet(e);
-            size++;
         }
         while (lastValues.getValues()[0] == null){
             movingToLeft(lastValues);
@@ -77,12 +62,30 @@ public class TripletDeque<E> implements Deque<E>, Containerable {
 
     @Override
     public boolean offerFirst(E e) {
-        return false;
+        if (e == null){
+            throw new NullPointerException();
+        }else{
+            if (size==maxSizeTriplet){
+                throw new IllegalArgumentException();
+            }else{
+                addFirst(e);
+                return true;
+            }
+        }
     }
 
     @Override
     public boolean offerLast(E e) {
-        return false;
+        if (e == null){
+            throw new NullPointerException();
+        }else{
+            if (size==maxSizeTriplet){
+                throw new IllegalArgumentException();
+            }else{
+                addLast(e);
+                return true;
+            }
+        }
     }
 
     @Override
@@ -106,11 +109,6 @@ public class TripletDeque<E> implements Deque<E>, Containerable {
             }
 
         }else{//1 триплет
-            if (firstValues.checkOneElement()){
-                temp = firstValues.getValues()[firstValues.checkNullLeftInt()];
-//                lastValues = null;
-//                firstValues = lastValues;
-            }
             if (firstValues.checkNullLeft()){
                 temp = firstValues.getValues()[firstValues.checkNullLeftInt()];
                 firstValues.getValues()[firstValues.checkNullLeftInt()] = null;
@@ -130,6 +128,7 @@ public class TripletDeque<E> implements Deque<E>, Containerable {
                 temp = lastValues.getValues()[0];
                 lastValues = lastValues.getPrevLink();
                 lastValues.setNextLink(null);
+                size--;
                 return (E) temp;
             }
             if (lastValues.checkNullRight()){
@@ -141,11 +140,6 @@ public class TripletDeque<E> implements Deque<E>, Containerable {
             }
 
         }else{//1 триплет
-            if (lastValues.checkOneElement()){
-                temp = lastValues.getValues()[lastValues.checkNullRightInt()];
-//                lastValues = null;
-//                firstValues = lastValues;
-            }
             if (lastValues.checkNullRight()){
                 temp = lastValues.getValues()[lastValues.checkNullRightInt()];
                 lastValues.getValues()[lastValues.checkNullRightInt()] = null;
@@ -161,12 +155,20 @@ public class TripletDeque<E> implements Deque<E>, Containerable {
 
     @Override
     public E pollFirst() {
-        return null;
+        if (this.checkOneTriplet() && firstValues.checkNullLeft() && firstValues.checkNullRight()){
+            return null;
+        }else{
+            return removeFirst();
+        }
     }
 
     @Override
     public E pollLast() {
-        return null;
+        if (this.checkOneTriplet() && firstValues.checkNullLeft() && firstValues.checkNullRight()){
+            return null;
+        }else{
+            return removeLast();
+        }
     }
 
     @Override
@@ -192,201 +194,112 @@ public class TripletDeque<E> implements Deque<E>, Containerable {
 
     @Override
     public E peekFirst() {
-        return null;
+        if (this.checkOneTriplet() && firstValues.checkNullLeft() && firstValues.checkNullRight()){
+            return null;
+        }else{
+            return getFirst();
+        }
     }
 
     @Override
     public E peekLast() {
-        return null;
+        if (this.checkOneTriplet() && firstValues.checkNullLeft() && firstValues.checkNullRight()){
+            return null;
+        }else{
+            return getLast();
+        }
     }
 
     @Override
     public boolean removeFirstOccurrence(Object o) {
-        if (o == null){
-            throw new NullPointerException();
-        }
-        if (o.getClass().equals(firstValues.getValues().getClass())){
-            throw new ClassCastException();
-        }
-        ElementWrap<E> temp = firstValues;
-        ElementWrap<E> tempNext = temp;
-        boolean flag = false;
-        if (!checkOneTriplet()){
-            while (temp.getValues()[4] == null){
-                movingToLeftAny(temp);
-            }
-            while (temp != lastValues && flag == false){
-                flag = forRemoveOccuranceFirst(temp,o);
-                if (flag){
-                    temp.getValues()[4] = temp.getNextLink().getValues()[0];
-                    if (temp.getNextLink() == lastValues){
-                        if (flag == false){
-                            flag = forRemoveOccuranceFirst(temp,o);
-                        }else {
-                            movingToLeftAny(temp.getNextLink());
-                        }
+        ArrayList<E> tempList = new ArrayList<>();
+        ElementWrap<E> tempTriplet = firstValues;
+        int tempSize = size;
+        boolean flag = true;
+        int i = 0, count = 0;
+
+        while (tempSize > 0){
+            while (i < tempTriplet.getValues().length){
+                while (tempTriplet.getValues()[i] == null && i < tempTriplet.getValues().length){
+                    i ++;
+                    if (i == 5){
+                        i = 4;
+
+                        break;
                     }
-                    break;
                 }
-                temp = temp.getNextLink();
-            }
-
-            if (temp.getNextLink() == null ){
-                if(flag == false){
-                    flag = forRemoveOccuranceFirst(temp,o);
-
+                if (o.equals(tempTriplet.getValues()[i]) && count == 0){
+                    count +=1 ;
+                    flag = false;
                 }else{
-                    movingToLeftAny(temp);
+                    if (tempTriplet.getValues()[i] == null){
+                        break;
+                    }
+                    tempList.add((E) tempTriplet.getValues()[i]);
                 }
-                temp.getValues()[4] = null;
-
-            }else{
-                temp = temp.getNextLink();
+                i++;
             }
-
-            if (flag && temp.getNextLink() != null){
-                while (temp.getNextLink() != null){
-                    movingToLeftAny(temp);
-                    temp.getValues()[4] = temp.getNextLink().getValues()[0];
-                    temp = temp.getNextLink();
-                }
-                temp.getPrevLink().getValues()[4] = temp.getValues()[0];
-                movingToLeftAny(temp);
+            i = 0;
+            if (tempTriplet.getNextLink() != null){
+                tempTriplet = tempTriplet.getNextLink();
             }
-        }else{
-            flag = forRemoveOccuranceFirst(temp,o);
-            temp.getValues()[4] = null;
+            tempSize --;
         }
-        if (temp == firstValues && firstValues.getValues()[0]==null && firstValues.getValues()[4]==null){
-            firstValues = firstValues.getNextLink();
-            firstValues.setPrevLink(null);
-        }if (temp == lastValues && lastValues.getValues()[0]==null && lastValues.getValues()[4]==null){
-            lastValues = lastValues.getPrevLink();
-            lastValues.setNextLink(null);
+        this.clear();
+        for (Object obj : tempList){
+            if (obj != null){
+                this.addLast((E) obj);
+            }
         }
-        if (flag==false){
-            return false;
-        }
-        return true;
+        return !flag;
 
     }
 
     @Override
     public boolean removeLastOccurrence(Object o) {
-        if (o == null){
-            throw new NullPointerException();
-        }
-        if (o.getClass().equals(firstValues.getValues().getClass())){
-            throw new ClassCastException();
-        }
-        ElementWrap<E> temp = lastValues;
-        boolean flag = false;
-        if (!checkOneTriplet()){
-//            while (temp.getValues()[0] == null){
-//                movingToLeftAny(temp);
-//            }
-            while (temp != firstValues && flag == false){
-                flag = forRemoveOccuranceLast(temp,o);
-                if (flag){
-                    if(temp.getNextLink() != null){
-                        temp.getValues()[4] = temp.getNextLink().getValues()[0];
+        ArrayList<E> tempList = new ArrayList<>();
+        ElementWrap<E> tempTriplet = lastValues;
+        int tempSize = size;
+        boolean flag = true;
+        int i = tempTriplet.getValues().length - 1, count = 0;
+
+        while (tempSize > 0){
+            while (i >= 0){
+                while (tempTriplet.getValues()[i] == null && i >= 0){
+                    i --;
+                    if (i == -1){
+                        i = 0;
+
+                        break;
                     }
-                    break;
                 }
-                temp = temp.getPrevLink();
-                if (temp.getPrevLink() == null && flag == false){
-                    flag = forRemoveOccuranceLast(temp,o);
-                    temp.getValues()[4] = temp.getNextLink().getValues()[0];
-
+                if (o.equals(tempTriplet.getValues()[i]) && count == 0){
+                    count +=1 ;
+                    flag = false;
+                }else{
+                    if (tempTriplet.getValues()[i] == null){
+                        break;
+                    }
+                    tempList.add((E) tempTriplet.getValues()[i]);
                 }
-
+                i--;
             }
-            if (temp != lastValues && temp.getValues()[1] != null){
-                temp.getValues()[0] = temp.getPrevLink().getValues()[4];
+            i = tempTriplet.getValues().length - 1;
+            if (tempTriplet.getPrevLink() != null){
+                tempTriplet = tempTriplet.getPrevLink();
             }
-
-            if (flag && temp.getNextLink() != null){
-                temp = temp.getNextLink();
-
-                while (temp.getNextLink() != null){
-                    movingToLeftAny(temp);
-                    temp.getValues()[4] = temp.getNextLink().getValues()[0];
-                    temp = temp.getNextLink();
-                }
-                movingToLeftAny(temp);
-                temp.getPrevLink().getValues()[4] = temp.getValues()[0];
-            }
-        }else{
-            flag = forRemoveOccuranceLast(temp,o);
-            if (flag){
-                temp.getValues()[4] = null;
+            tempSize --;
+        }
+        this.clear();
+        for (Object obj : tempList){
+            if (obj != null){
+                this.addFirst((E) obj);
             }
         }
-        if (temp == firstValues && firstValues.getValues()[0]==null && firstValues.getValues()[4]==null){
-            firstValues = firstValues.getNextLink();
-            firstValues.setPrevLink(null);
-        }if (temp == lastValues && lastValues.getValues()[0]==null && lastValues.getValues()[4]==null){
-            lastValues = lastValues.getPrevLink();
-            lastValues.setNextLink(null);
-        }
-        if (flag==false){
-            throw new NoSuchElementException();
-        }
-        return true;
+        return !flag;
     }
 
-    private boolean forRemoveOccuranceLast(ElementWrap<E> temp, Object o) {
-        boolean flag = false;
-        for (int i = 4; i >= 0; i--){
-            if (temp.getValues()[i] != null){
-                if (temp.getValues()[i].equals(o)){
-                    flag = true;
-                    temp.getValues()[i] = null;
-                    for(int j = i; j < temp.getValues().length-1; j++){
-                        temp.getValues()[j] = temp.getValues()[j+1];
-                    }
-                    break;
-                }
-            }
-        }
-        return flag;
-    }
-    private boolean forRemoveOccuranceFirst(ElementWrap<E> temp, Object o){
-        boolean flag = false;
 
-        for (int i = 0; i < temp.getValues().length; i++){
-            if (temp.getValues()[i] != null){
-                if (temp.getValues()[i].equals(o)){
-                    flag = true;
-                    temp.getValues()[i] = null;
-                    for(int j = i; j < temp.getValues().length-1; j++){
-                        temp.getValues()[j] = temp.getValues()[j+1];
-                    }
-                    break;
-                }
-            }
-        }
-//        if (firstValues.checkNullRightInt() == 0){
-//            firstValues = firstValues.getNextLink();
-//            firstValues.setPrevLink(null);
-//        }
-        return flag;
-    }
-
-    //    add
-//    Вставляет указанный элемент в очередь, представленную этим deque (другими словами, в хвост этого deque),
-//    если это возможно сделать немедленно, не нарушая ограничений емкости, возвращая true в случае успеха и вызывая исключение IllegalStateException,
-//    если в данный момент нет свободного места. При использовании deque с ограниченной вместимостью, как правило, предпочтительнее использовать offer.
-//    Этот метод эквивалентен добавлению последнего.
-//            Параметры:
-//    e – элемент, который нужно добавить
-//    Возвращается:
-//            true (как указано в Collection.add)
-//    Бросает:
-//    Исключение IllegalStateException – если элемент не может быть добавлен в данный момент из-за ограничений емкости
-//    ClassCastException – если класс указанного элемента препятствует его добавлению в этот список
-//    Исключение NullPointerException – если указанный элемент равен null и этот deque не разрешает элементы null
-//    Исключение IllegalArgumentException – если какое-либо свойство указанного элемента препятствует его добавлению в этот список
     @Override
     public boolean add(E e) {
         addLast(e);
@@ -396,7 +309,7 @@ public class TripletDeque<E> implements Deque<E>, Containerable {
 
     @Override
     public boolean offer(E e) {
-        return false;
+        return offerLast(e);
     }
 
     @Override
@@ -406,41 +319,45 @@ public class TripletDeque<E> implements Deque<E>, Containerable {
 
     @Override
     public E poll() {
-        return null;
+        return pollFirst();
     }
 
     @Override
     public E element() {
-        return null;
+        if (peekFirst() == null){
+            throw new NoSuchElementException();
+        }
+        return peekFirst();
     }
 
     @Override
     public E peek() {
-        return null;
+        return peekFirst();
     }
 
     @Override
     public boolean addAll(Collection<? extends E> c) {
-        return false;
-    }
-
-    @Override
-    public boolean removeAll(Collection<?> c) {
-        return false;
-    }
-
-    @Override
-    public boolean retainAll(Collection<?> c) {
-        return false;
+        for (E el : c){
+            offerLast(el);
+        }
+        return true;
     }
 
     @Override
     public void clear() {
-
+        while(this.iterator().hasNext()){
+            this.removeFirst();
+        }
+        size = 1;
     }
 
     @Override
     public void push(E e) {
+        if (e == null){
+            throw new NullPointerException();
+        }else{
+            addFirst(e);
+        }
 
     }
 
@@ -454,10 +371,6 @@ public class TripletDeque<E> implements Deque<E>, Containerable {
         return removeFirstOccurrence(o);
     }
 
-    @Override
-    public boolean containsAll(Collection<?> c) {
-        return false;
-    }
 
     @Override
     public boolean contains(Object o) {
@@ -475,16 +388,10 @@ public class TripletDeque<E> implements Deque<E>, Containerable {
 
     @Override
     public int size() {
-        return firstValues.getValues().length;
+        return size;
     }
 
-    @Override
-    public boolean isEmpty() {
-        if (checkOneTriplet()){
-            return (firstValues.checkNullLeft() && firstValues.checkNullRight());
-        }
-        return false;
-    }
+
 
     @Override
     public Iterator<E> iterator() {
@@ -535,25 +442,15 @@ public class TripletDeque<E> implements Deque<E>, Containerable {
     }
 
     @Override
-    public Object[] toArray() {
-        return new Object[0];
-    }
-
-    @Override
-    public <T1> T1[] toArray(T1[] a) {
-        return null;
-    }
-
-    @Override
     public Iterator<E> descendingIterator() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public Object[] getContainerByIndex(int cIndex) {
         ElementWrap<E> temp = firstValues;
         int count = 0;
-        while (count< cIndex){
+        while (count < cIndex && temp != null){
             temp = temp.getNextLink();
             count++;
         }
@@ -563,6 +460,42 @@ public class TripletDeque<E> implements Deque<E>, Containerable {
             return temp.getValues();
         }
     }
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    @Override
+    public boolean removeAll(Collection<?> c) {
+        clear();
+        return true;
+    }
+
+    @Override
+    public boolean retainAll(Collection<?> c) {
+        return false;
+    }
+
+    @Override
+    public boolean containsAll(Collection<?> c) {
+        return false;
+    }
+
+    @Override
+    public boolean isEmpty() {
+        if (checkOneTriplet()){
+            return (firstValues.checkNullLeft() && firstValues.checkNullRight());
+        }
+        return false;
+    }
+
+    @Override
+    public Object[] toArray() {
+        return new Object[0];
+    }
+
+    @Override
+    public <T1> T1[] toArray(T1[] a) {
+        return null;
+    }
+
 
 
     //проверка на существование только 1 триплета
@@ -590,15 +523,6 @@ public class TripletDeque<E> implements Deque<E>, Containerable {
         }
         any.getValues()[any.getMaxSizeValues()] = null;
     }
-    private void movingToLeftAny(ElementWrap<E> any){
-        int i = 0;
-        while(i < any.getValues().length - 1 && any.getValues()[i] != null){
-            any.getValues()[i] = any.getValues()[i+1];
-            i++;
-        }
-        any.getValues()[any.getMaxSizeValues()] = null;
-
-    }
 
     private void createLeftTriplet(E e){
         ElementWrap<E> newtriplet = new ElementWrap<>();
@@ -615,24 +539,5 @@ public class TripletDeque<E> implements Deque<E>, Containerable {
         lastValues = newtriplet;
         lastValues.getValues()[lastValues.checkNullRightInt()] = e;
         size++;
-    }
-
-
-    public void print(){
-        ElementWrap<E> newtriplet = firstValues;
-        boolean fl = true;
-        int ii = 0;
-        while(ii < 100){
-            for (int i = 0; i <= firstValues.getMaxSizeValues(); i++){
-                System.out.print(newtriplet.getValues()[i] + " ");
-            }
-            System.out.println();
-            newtriplet = newtriplet.getNextLink();
-            ii++;
-
-        }
-
-
-
     }
 }

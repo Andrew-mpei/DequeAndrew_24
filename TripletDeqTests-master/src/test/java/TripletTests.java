@@ -250,9 +250,12 @@ public class TripletTests {
             tQueue.addFirst(i+"");
         }
         Object[] cntr = cQueue.getContainerByIndex(0);
+
         Assertions.assertTrue(cntr[0] != null && cntr[cntr.length-1] != null);
         tQueue.remove("2");
+
         Assertions.assertTrue(cntr[0] == null || cntr[cntr.length-1] == null);
+
 
         for (int i=1; i < cntr.length-2; i++){
             assertNotNull(cntr[i]);
@@ -278,6 +281,7 @@ public class TripletTests {
 
         cntr = cQueue.getContainerByIndex(0);
         cntr1 = cQueue.getContainerByIndex(1);
+        System.out.println(cntr);
         cntr2 = cQueue.getContainerByIndex(2);
 
         Assertions.assertTrue(cntr!=null && cntr1 != null && cntr2 ==null);
@@ -285,38 +289,184 @@ public class TripletTests {
     }
     //TODO Новые тесты
     @Test
-    void removeLastOccurrenceTest(){
+    void removeLastOccurrenceTest1(){
         for (int i=0; i < 23 ;i++){
             tQueue.addFirst(""+i);
-        }//1 раз добавили "17"
-        tQueue.addLast("17");//2 раза добавили
-        tQueue.addLast("17");//3 раза добавили
+        }
+        tQueue.addLast("17");
+        tQueue.addLast("17");
 
-        tQueue.removeLastOccurrence("17");//удалили 1 раз
+        tQueue.removeLastOccurrence("17");
         Assertions.assertTrue(tQueue.contains("17"));
 
-        tQueue.removeLastOccurrence("17");//удалили 2 раз
+        tQueue.removeLastOccurrence("17");
         for (int i=0; i < 23 ;i++){
             Assertions.assertTrue(tQueue.contains(""+i));
         }
     }
+
     @Test
-    void removeFirstOccurrenceTest(){
+    void removeLastOccurrenceTest2(){
+        for (int i=0; i < 23 ;i++){
+            tQueue.addFirst(""+i);
+        }//1 раз добавили "17"
+        tQueue.addFirst("17");
+        tQueue.addLast("17");
+
+        tQueue.removeLastOccurrence("17");
+        Assertions.assertTrue(tQueue.contains("17"));
+
+        tQueue.removeLastOccurrence("17");
+        tQueue.removeLastOccurrence("17");
+
+        for (int i=0; i < 16 ;i++){
+            Assertions.assertTrue(tQueue.contains(""+i));
+        }
+        for (int i=18; i < 23 ;i++){
+            Assertions.assertTrue(tQueue.contains(""+i));
+        }
+        Assertions.assertFalse(tQueue.removeLastOccurrence("17"));//удалили 4 раз
+    }
+    @Test
+    void removeFirstOccurrenceTest1(){
         for (int i=0; i < 23 ;i++){
             tQueue.addFirst(""+i);
         }
-        tQueue.addLast("17");//2 раза добавили
-        tQueue.addLast("17");//3 раза добавили
+        tQueue.addLast("17");
+        tQueue.addLast("17");
         Assertions.assertTrue(tQueue.contains("17"));
 
-        tQueue.removeFirstOccurrence("17");//удалили 1 раз
+        tQueue.removeFirstOccurrence("17");
         Assertions.assertTrue(tQueue.contains("17"));
 
-        tQueue.removeFirstOccurrence("17");//удалили 2-ой раз
+        tQueue.removeFirstOccurrence("17");
         for (int i=18; i < 23 ;i++){
             Assertions.assertTrue(tQueue.contains(""+i));
         }
     }
+
+    @Test
+    void removeFirstOccurrenceTest2(){
+        for (int i=0; i < 23 ;i++){
+            tQueue.addFirst(""+i);
+        }
+        tQueue.addLast("17");
+        tQueue.addFirst("17");
+        Assertions.assertTrue(tQueue.contains("17"));
+
+        tQueue.removeFirstOccurrence("17");
+        Assertions.assertTrue(tQueue.contains("17"));
+
+        tQueue.removeFirstOccurrence("17");
+
+        for (int i=18; i < 23 ;i++){
+            Assertions.assertTrue(tQueue.contains(""+i));
+        }
+        tQueue.removeFirstOccurrence("17");//удалили 3-ий раз
+        Assertions.assertFalse(tQueue.removeFirstOccurrence("17"));//удалили 4 раз
+    }
+    @Test
+    void holeTest2(){
+        for (int i =0; i < 5; i++){
+            tQueue.addLast(i+"");
+        }
+        Object[] cntr = cQueue.getContainerByIndex(0);
+
+        Assertions.assertTrue(cntr[0] != null && cntr[cntr.length-1] != null);
+        tQueue.removeLastOccurrence("2");
+
+        Assertions.assertTrue(cntr[0] == null || cntr[cntr.length-1] == null);
+
+
+        for (int i=1; i < cntr.length-2; i++){
+            assertNotNull(cntr[i]);
+        }
+    }
+
+    @Test
+    void offerTest(){
+        tQueue.offerFirst("one");
+        tQueue.offerFirst("two");
+        assertEquals("two", tQueue.getFirst());
+        assertEquals("one", tQueue.getLast());
+        tQueue.offerFirst("three");
+        assertEquals("three", tQueue.getFirst());
+        assertEquals("one", tQueue.getLast());
+        tQueue.offerFirst("four");
+        tQueue.offerLast("five");
+        tQueue.offerFirst("six");
+        assertEquals("six", tQueue.getFirst());
+        assertEquals("five", tQueue.getLast());
+    }
+
+    @Test
+    public void testPollFirst() {
+        for (int i=3; i < 15 ;i++){
+            tQueue.addFirst("n_"+i);
+        }
+
+        Assertions.assertTrue(tQueue.contains("n_14"));
+        tQueue.poll();
+        Assertions.assertFalse(tQueue.contains("n_14"));
+
+        for (int i = 3; i < 14; i++){
+            tQueue.remove();
+        }
+        Assertions.assertNull(tQueue.poll());
+
+    }
+
+    @Test
+    public void testPeek() {
+        for (int i=0; i < 17 ;i++){
+            tQueue.addFirst("n_"+i);
+        }
+
+        for (int i = 0; i < 16; i++){
+            tQueue.removeFirst();
+        }
+        Assertions.assertEquals("n_0", tQueue.peek());
+        tQueue.remove();
+        Assertions.assertNull(tQueue.peek());
+
+    }
+
+    @Test
+    public void testElement() {
+        try {
+            tQueue.element();
+            fail( "Should have thrown a NoSuchElementException.");
+        } catch( NoSuchElementException eeee ){
+            // Continue
+        }catch( Exception e ){
+            fail( "Should have thrown a NoSuchElementException, but received" +
+                    " : " + e);
+        }
+    }
+
+    @Test
+    public void testAddAll() {
+        for (int i=0; i < 5 ;i++){
+            tQueue.addLast("n_"+i);
+        }
+        Deque<String> ttQueue = tQueue;
+        while(ttQueue.iterator().hasNext()){
+            ttQueue.removeFirst();
+        }
+        ttQueue.addAll(tQueue);
+        assertEquals(tQueue, ttQueue);
+    }
+
+    @Test
+    void pushTest(){
+        for (int i=0; i < 15 ;i++){
+            tQueue.push("n_"+i);
+        }
+
+        Assertions.assertTrue(tQueue.contains("n_3"));
+
+    }
+
     @BeforeEach
     void beforeEach(){
         tQueue.clear();
